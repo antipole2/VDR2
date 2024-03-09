@@ -12,12 +12,12 @@ omit = [	// NMEA0183 sentences to omit
 n2kConverters = {
 	// Link NMEA2k pgns to their coverter function
 	128267: decode128267,	// depth
-	130306: decode130306		// wind
+	130306: decode130306	// wind
 	};
 
 // Declarations in outermost scope
 const scriptName = "VDR2";
-const sender = "VL";	// NMEA0183 psnder for generated sentences
+const sender = "VL";	// NMEA0183 sender for generated sentences
 const dialogueCaption = [{type:"caption", value:scriptName}];
 var options;
 var nmeaStash = {};
@@ -29,7 +29,7 @@ var fileModeIndex;
 
 // debugging settings
 if (OCPNgetPluginConfig().PluginVersionMajor < 3) throw(scriptName + " requires plugin v3 or later.");
-log = true;	// print to output window as well as file
+log = false;	// print to output window as well as file
 trace = false;
 trace2k = false;	// trace just in N2K
 // _remember = {};	// uncomment to force first time - normally commented out
