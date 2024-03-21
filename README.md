@@ -42,7 +42,7 @@ When a control panel choice has been made, the panel is no longer displayed. All
 
 ## Installing the script
 
-1. Copy this URL to your clipboard (copy link - do not follow it) - [https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js]
+1. Copy this URL to your clipboard (copy link - do not follow it) - [https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js]()
 2. In a JavaScript console choose `Load` and then `URL on clipboard`.  The script should be loaded into the script pane.
 3. Choose `Run` to start the script.
 
