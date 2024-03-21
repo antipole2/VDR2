@@ -50,7 +50,7 @@ NB If you want to run the script when not online, you will need to save it to a 
 
 ## Discussions
 
-To discuss this script's functionality, us ethe Discussions tab aboove.
+To discuss this script's functionality, use the Discussions tab aboove.
 
 ## Technical note
 
