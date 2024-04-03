@@ -2,9 +2,11 @@
  
 This JavaScript provides a Voyage Data Recorder for OpenCPN.  It is inspired by the VDR plugin but enhances functionality in various ways.
 
-## Recording frequency
+## Recording frequency & distance
 
-You set a recording interval in the options.  The plugin acumulates data for that period, keeping just the latest.  When the time interval is up, it writes the data to file as NMEA0183 records.  The size of the log file is greatly reduced by only recording data at intervals.
+You set a recording interval in the options.  The plugin accumulates data for that period, keeping just the latest.  When the time interval is up, it writes the data to the file as NMEA0183 records.  The size of the log file is greatly reduced by only recording data at intervals.
+
+You can set a minimum distance before a new set of entries is made.  If the boat has not moved that far from the previous entry, the recording will be skipped.  If you, for example, set a minimum distance of 0.01, this would limit recording when becalmed and pause it completely when at anchor.
 
 ## Source of navigation data
 
