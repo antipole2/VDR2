@@ -9,6 +9,9 @@ omit = [	// NMEA0183 sentences to omit
 	// add here any others to be omitted
 	];
 
+logToFile = true;		// data added to file
+logToDisplay = false;		// data will appear in the output pane
+
 n2kConverters = {
 	// Link NMEA2k pgns to their coverter function
 	128267: decode128267,	// depth
@@ -26,10 +29,10 @@ var n2Kobjects = {};	// to hold the NMEA2000 objects
 var logFile;		// the log file object
 var intervalIndex;	// indexes into dialogues declared in outer scope
 var fileModeIndex;
+if (OCPNgetPluginConfig().PluginVersionMajor < 3) throw(scriptName + " requires plugin v3 or later.");
 
 // debugging settings
 if (OCPNgetPluginConfig().PluginVersionMajor < 3) throw(scriptName + " requires plugin v3 or later.");
-log = false;	// print to output window as well as file
 trace = false;
 trace2k = false;	// trace just in N2K
 // _remember = {};	// uncomment to force first time - normally commented out
@@ -120,6 +123,10 @@ function actionDialogue(){
 		intervalIndex = dialogue.length;
 		dialogue.push({	type:"field", label:"Recording every", width:30,value:(options.interval), suffix:"seconds"});
 		}
+	if ((options.status == "paused") || (options.status == "stopped")){
+		distanceIndex = dialogue.length;
+		dialogue.push({	type:"field", label:"Minimum distance", width:30,value:(options.distance), suffix:"nm"});
+		}
 	if ((options.status != "recording")  && (options.status != "paused")){
 		fileModeIndex = dialogue.length;
 		dialogue.push({type:"radio", value:["Overwrite", (options.mode == APPEND)?"*Append":"Append", "Append (auto start)"]});
@@ -134,6 +141,8 @@ function actionResponse(response){
 	switch (button){
 		case "Quit": stopScript("Quit");
 		case "Dismiss":
+			options.interval = Number(response[intervalIndex].value);	// pick up interval
+			options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
 			break;
 		case "End":
 			onSeconds();	// cancel timers
@@ -153,10 +162,12 @@ function actionResponse(response){
 		case "Record":
 			how = response[fileModeIndex].value;
 			options.interval = Number(response[intervalIndex].value);	// pick up interval
+			options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
 			startRecording(how);
 			break;
 		case "Resume":
 			options.interval = Number(response[intervalIndex].value);	// pick up interval
+			options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
 			resumeRecording();
 			break;
 		case "Change file":
@@ -217,6 +228,12 @@ function capture(){
 	UTC = moment.slice(0,2) + moment.slice(3,5) + moment.slice(6,12);
 	buffer = "";
 	navData = OCPNgetNavigation();
+	if (trace) print(navData, "\nLast position: ", options.lastPosition, "\n");
+	if (options.lastPosition && OCPNgetVectorPP(navData.position, options.lastPosition).distance < options.distance){
+		if (trace) print("Not moved enough to record\n");
+		return;
+		}
+	else options.lastPosition = navData.position;
 	sentence = "$" + sender + "GLL," + new Position(navData.position).NMEA + "," + UTC + ",A,A";
 	buffer += sentence + "*" + NMEA0183checksum (sentence) + "\n";
 	// if stationary, COG and HDG might not be valid numbers - avoid including them.
@@ -261,8 +278,8 @@ function capture(){
 */
 		}
 	n2kStash = {};
-	if (log) print(buffer, "\n");
-	logFile.writeText(buffer);
+	if (logToDisplay) print(buffer);
+	if (logToFile) logFile.writeText(buffer);
 	}
 
 function setupN2k(){	// returns true if have N2K else false
@@ -276,8 +293,8 @@ function setupN2k(){	// returns true if have N2K else false
 			continue;
 			}
 		}
-	if (!found) return false;
 	if (trace2k) print("N2K port ", found?"found":"not found", "\n");
+	if (!found) return false;
 	var keys = Object.keys(n2kConverters);
 	for (var i = 0; i <keys.length; i++){
 		pgn = Number(keys[i]);
@@ -318,10 +335,13 @@ function getOptions(){
 	if ((_remember == undefined) || (!_remember.hasOwnProperty(scriptName))){ //first time set up
 		if (trace) print("First time\n");
 		consoleName(scriptName);
+		_remember = {};
 		_remember[scriptName] = scriptName;	// our fingerprint in _remember
 		_remember.options = {
-			fileString:"",
-			interval: 5,
+			fileString:"",			// file string for recording
+			interval: 5,			// recording interval in seconds
+			distance: 0,			// minimum distance between records
+			lastPosition: false,	// position at last recordings
 			status: "stopped",
 			autoStart: false
 			}
