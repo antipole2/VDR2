@@ -2,9 +2,11 @@
  
 This JavaScript provides a Voyage Data Recorder for OpenCPN.  It is inspired by the VDR plugin but enhances functionality in various ways.
 
-## Recording frequency
+## Recording frequency & distance
 
-You set a recording interval in the options.  The plugin acumulates data for that period, keeping just the latest.  When the time interval is up, it writes the data to file as NMEA0183 records.  The size of the log file is greatly reduced by only recording data at intervals.
+You set a recording interval in the options.  The plugin accumulates data for that period, keeping just the latest.  When the time interval is up, it writes the data to the file as NMEA0183 records.  The size of the log file is greatly reduced by only recording data at intervals.
+
+You can set a minimum distance before a new set of entries is made.  If the boat has not moved that far from the previous entry, the recording will be skipped.  If you, for example, set a minimum distance of 0.01, this would limit recording when becalmed and pause it completely when at anchor.
 
 ## Source of navigation data
 
@@ -42,7 +44,7 @@ When a control panel choice has been made, the panel is no longer displayed. All
 
 ## Installing the script
 
-1. Copy this URL to your clipboard - https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js
+1. Copy this URL to your clipboard (copy link - do not follow it) - `https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js`
 2. In a JavaScript console choose `Load` and then `URL on clipboard`.  The script should be loaded into the script pane.
 3. Choose `Run` to start the script.
 
@@ -50,7 +52,7 @@ NB If you want to run the script when not online, you will need to save it to a 
 
 ## Discussions
 
-To discuss this script's functionality, us ethe Discussions tab aboove.
+To discuss this script's functionality, use the Discussions tab aboove.
 
 ## Technical note
 
