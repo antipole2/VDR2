@@ -50,10 +50,14 @@ When a control panel choice has been made, the panel is no longer displayed. All
 
 NB If you want to run the script when not online, you will need to save it to a local file.
 
+## Updates
+
+This script has automatic checking for updates.
+
 ## Discussions
 
-To discuss this script's functionality, use the Discussions tab aboove.
+To discuss this script's functionality, use the Discussions tab above.
 
 ## Technical note
 
-The script options are stored in the console's `_remember` variable.  They thus endure between script runs and across OpenCPN restarts (proviided OpenCPN quits gracefully).  The `_remember` variable is unique to the console.  Should you run the script in a different console, it will have fresh option settings.
+The script options are stored in the console's `_remember` variable.  They thus endure between script runs and across OpenCPN restarts (provided OpenCPN quits gracefully).  The `_remember` variable is unique to the console.  Should you run the script in a different console, it will have fresh option settings.
