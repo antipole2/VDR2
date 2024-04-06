@@ -28,16 +28,8 @@ The table `n2kConverters` comprises the PGNs to be listened for and their conver
 
 To omit from recording, comment out the relevant table entry.
 
-To add additional NMEA2000 data, you need to provide a converter function.  The hard work of decoding the binary data is done by the plugin.  Start by adding the converter function, like this for the PGN 123456:
-
-````
-function convert123456(obj){
-     print(JSON.stringify(obj, null, "\t"), "\n");
-     }
-````
-Then add an entry to the `n2kConverters` table thus:
-
-````
+To add additional NMEA2000 data, you need to provide a converter function.
+For instructions on how to do this, [see here](https://github.com/antipole2/VDR2/blob/main/adding_NMEA2000_converters.md).
 
 ## Control panel
 
