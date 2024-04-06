@@ -18,9 +18,10 @@ n2kConverters = {
 	130306: decode130306	// wind
 	};
 
-checkVersion();
 // Declarations in outermost scope
 const scriptName = "VDR2";
+const scriptVersion = 1.0;
+checkVersion();
 const sender = "VL";	// NMEA0183 sender for generated sentences
 const dialogueCaption = [{type:"caption", value:scriptName}];
 var options;
@@ -332,10 +333,10 @@ function decode130306(obj){	// wind
 function getOptions(){
 	// restore our preferences, if saved
 	if (trace) print("_remember\n", JSON.stringify(_remember, null, "\t"), "\n");
-	if ((_remember == undefined) || (!_remember.hasOwnProperty(scriptName))){ //first time set up
+	if (_remember == undefined) _remember = {};
+	if (!_remember.hasOwnProperty(scriptName)){ //first time set up
 		if (trace) print("First time\n");
 		consoleName(scriptName);
-		_remember = {};
 		_remember[scriptName] = scriptName;	// our fingerprint in _remember
 		_remember.options = {
 			fileString:"",			// file string for recording
@@ -361,12 +362,40 @@ function cancelAlert(){
 
 function tidyUp(){
 	consoleName(scriptName);
+print(JSON.stringify(_remember, null, "\t"), "\n");
 	}
 
 function checkVersion(){
 	if (OCPNgetPluginConfig().PluginVersionMajor < 3) throw(scriptName + " requires plugin v3 or later.");
-	scriptVersion = 0.9;
-	versionCheckURL = "";
 	if (!OCPNisOnline()) return;
 
+	if (_remember == undefined) _remember = {};
+	now = Date.now();
+	if (_remember.hasOwnProperty("versionControl")){
+		lastCheck = _remember.versionControl.lastCheck;
+		checkDays = 5;	// how often to check
+		if (now < (lastCheck + checkDays*24*60*60*1000)) return;
+		_remember.versionControl.lastCheck = now;
+		}
+	else _remember.versionControl = {"lastCheck":0};
+	versionCheckURL = "https://raw.githubusercontent.com/antipole2/VDR2/main/version.JSON";
+	scriptURL = "https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js"
+	details = JSON.parse(readTextFile(versionCheckURL));
+	if (scriptVersion < details.version){
+		message = "Script update to version " + details.version + " available."
+			+ "\nDate: " + details.date + "\nNew: " + details.new
+			+ "\n \nUpdating will lose any local changes you have made\nYou need to save these first"
+			+ "\nTo supress update prompts, disable the call to checkVersion"
+			+ "\nUpdate now?";
+		response = messageBox(message, "YesNo");
+		if (response == 2){
+			require("Consoles");
+			consoleLoad(scriptName, scriptURL);
+			message = "Script updated.\nYou need to save it loaclly if you want to run it off-line"
+				+ "\nYou can now run the updated script.";
+			messageBox(message);
+			stopScript("Script updated");
+			}
+		else _remember.versionControl.lastCheck = now;
+		}
 	}
