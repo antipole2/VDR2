@@ -12,11 +12,32 @@ You can set a minimum distance before a new set of entries is made.  If the boat
 
 Rather than logging the basic navigation data (position, CMG, SMG) directly from the received NMEA data, VDR2 generates these NMEA0183 records from OpenCPN navigation data.  Thus it uses whatever navigation OpenCPN is using, whether it be NMEA0183, NMEA2000 or SignalK.
 
+## Omitting NMEA0183 data
+
+There is a table `omit` containing NMEA0183 sentence types to be omitted.  You can add to this as required.
+
 ## NMEA2000 data
 
 If you have an NMEA2000 input, VDR2 can log that data by converting it to NMEA0183 sentences.  It does not rely on OpenCPN to perform the decoding but can handle any PGN for which there is a descriptor in the Canboat library.  The script has a table of PGNs to be listened for and the converter function which generates the NMEA0183 sentence.  These converter functions are quite simple - perhaps 6-7 lines of code.
 
-At present, there are converters for PGN 128267 (depth) and PGN 30306 (wind).  Morecan be added as required.
+At present, there are converters for PGN 128267 (depth) and PGN 30306 (wind).  More can be added as required.
+
+### Omitting or adding NMEA2000 data
+
+The table `n2kConverters` comprises the PGNs to be listened for and their converter functions.
+
+To omit from recording, comment out the relevant table entry.
+
+To add additional NMEA2000 data, you need to provide a converter function.  The hard work of decoding the binary data is done by the plugin.  Start by adding the converter function, like this for the PGN 123456:
+
+````
+function convert123456(obj){
+     print(JSON.stringify(obj, null, "\t"), "\n");
+     }
+````
+Then add an entry to the `n2kConverters` table thus:
+
+````
 
 ## Control panel
 
