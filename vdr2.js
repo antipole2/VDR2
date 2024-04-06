@@ -20,7 +20,7 @@ n2kConverters = {
 
 const scriptName = "VDR2";
 consoleName(scriptName);
-const scriptVersion = 0.9;
+const scriptVersion = 1.0;
 checkVersion();
 // Declarations in outermost scope
 const sender = "VL";	// NMEA0183 sender for generated sentences
