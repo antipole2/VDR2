@@ -18,6 +18,7 @@ n2kConverters = {
 	130306: decode130306	// wind
 	};
 
+checkVersion();
 // Declarations in outermost scope
 const scriptName = "VDR2";
 const sender = "VL";	// NMEA0183 sender for generated sentences
@@ -29,10 +30,9 @@ var n2Kobjects = {};	// to hold the NMEA2000 objects
 var logFile;		// the log file object
 var intervalIndex;	// indexes into dialogues declared in outer scope
 var fileModeIndex;
-if (OCPNgetPluginConfig().PluginVersionMajor < 3) throw(scriptName + " requires plugin v3 or later.");
+
 
 // debugging settings
-if (OCPNgetPluginConfig().PluginVersionMajor < 3) throw(scriptName + " requires plugin v3 or later.");
 trace = false;
 trace2k = false;	// trace just in N2K
 // _remember = {};	// uncomment to force first time - normally commented out
@@ -361,4 +361,12 @@ function cancelAlert(){
 
 function tidyUp(){
 	consoleName(scriptName);
+	}
+
+function checkVersion(){
+	if (OCPNgetPluginConfig().PluginVersionMajor < 3) throw(scriptName + " requires plugin v3 or later.");
+	scriptVersion = 0.9;
+	versionCheckURL = "";
+	if (!OCPNisOnline()) return;
+
 	}
