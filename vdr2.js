@@ -18,10 +18,11 @@ n2kConverters = {
 	130306: decode130306	// wind
 	};
 
-// Declarations in outermost scope
 const scriptName = "VDR2";
-const scriptVersion = 1.0;
+consoleName(scriptName);
+const scriptVersion = 0.9;
 checkVersion();
+// Declarations in outermost scope
 const sender = "VL";	// NMEA0183 sender for generated sentences
 const dialogueCaption = [{type:"caption", value:scriptName}];
 var options;
@@ -336,7 +337,6 @@ function getOptions(){
 	if (_remember == undefined) _remember = {};
 	if (!_remember.hasOwnProperty(scriptName)){ //first time set up
 		if (trace) print("First time\n");
-		consoleName(scriptName);
 		_remember[scriptName] = scriptName;	// our fingerprint in _remember
 		_remember.options = {
 			fileString:"",			// file string for recording
