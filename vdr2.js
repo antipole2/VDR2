@@ -14,8 +14,8 @@ logToDisplay = false;		// data will appear in the output pane
 
 n2kConverters = {
 	// Link NMEA2k pgns to their coverter function
-	128267: decode128267,	// depth
-	130306: decode130306	// wind
+	128267: convert128267,	// depth
+	130306: convert130306	// wind
 	};
 
 const scriptName = "VDR2";
@@ -109,13 +109,13 @@ function actionDialogue(){
 	dialogue.push({type:"text", width:1000, value: "File: " + options.fileString});
 	switch (options.status){
 		case "recording":
-			buttons = ["Quit", "Dismiss", "Pause", "End"];
+			buttons = ["Stop script", "Dismiss", "Pause", "End"];
 			break;
 		case "paused":
-			buttons = ["Quit", "Dismiss", "Resume", "End"];
+			buttons = ["Stop script", "Dismiss", "Resume", "End"];
 			break;
 		case "stopped":
-			buttons = ["Quit", "Dismiss", "Record"];
+			buttons = ["Stop script", "Dismiss", "Record"];
 			}
 	if ((options.status != "recording")  && (options.status != "paused")){
 		dialogue.push({type: "button", label:"Change file"});
@@ -123,11 +123,11 @@ function actionDialogue(){
 		}
 	if ((options.status == "paused") || (options.status == "stopped")){
 		intervalIndex = dialogue.length;
-		dialogue.push({	type:"field", label:"Recording every", width:30,value:(options.interval), suffix:"seconds"});
+		dialogue.push({	type:"field", label:"Recording every", width:50,value:(options.interval), suffix:"seconds"});
 		}
 	if ((options.status == "paused") || (options.status == "stopped")){
 		distanceIndex = dialogue.length;
-		dialogue.push({	type:"field", label:"Minimum distance", width:30,value:(options.distance), suffix:"nm"});
+		dialogue.push({	type:"field", label:"Minimum distance", width:60,value:(options.distance), suffix:"nm"});
 		}
 	if ((options.status != "recording")  && (options.status != "paused")){
 		fileModeIndex = dialogue.length;
@@ -141,10 +141,8 @@ function actionResponse(response){
 	if (trace) print("In actionResponse\n");
 	button = response[response.length-1].label;
 	switch (button){
-		case "Quit": stopScript("Quit");
+		case "Stop script": stopScript("Script stopped");
 		case "Dismiss":
-			options.interval = Number(response[intervalIndex].value);	// pick up interval
-			options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
 			break;
 		case "End":
 			onSeconds();	// cancel timers
@@ -160,16 +158,21 @@ function actionResponse(response){
 			OCPNonNMEA2000();
 			options.status = "paused";
 			consoleName(scriptName + "_" + options.status);
-			break;
+			actionDialogue();
+			return;
 		case "Record":
 			how = response[fileModeIndex].value;
 			options.interval = Number(response[intervalIndex].value);	// pick up interval
+			if (options.interval < 1) options.interval = 1;	// minimum recording interval
 			options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
+			if (options.distance < 0) options.distance = 0;
 			startRecording(how);
 			break;
 		case "Resume":
 			options.interval = Number(response[intervalIndex].value);	// pick up interval
+			if (options.interval < 1) options.interval = 1;	// minimum recording interval
 			options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
+			if (options.distance < 0) options.distance = 0;
 			resumeRecording();
 			break;
 		case "Change file":
@@ -306,7 +309,7 @@ function setupN2k(){	// returns true if have N2K else false
 	return true;
 	}
 
-function decode128267(obj){	// depth
+function convert128267(obj){	// depth
 	var sentence;
 	if (trace2k) print(JSON.stringify(obj, null, "\t"), "\n");
 	mtof  = 3.28084;	// metres to feet
@@ -322,9 +325,9 @@ function decode128267(obj){	// depth
 	buffer += sentence + "*" + NMEA0183checksum(sentence) + "\n";
 	}
 
-function decode130306(obj){	// wind
+function convert130306(obj){	// wind
 	var sentence;
-	if (trace2k) print(JSON.stringify(decoded, null, "\t"), "\n");
+	if (trace2k) print(JSON.stringify(obj, null, "\t"), "\n");
 	angle = obj.windAngle * 57.29578;	// angle from radians to degrees
 	speed = obj.windSpeed * 1.943844;	// speed from m/s to knots
 	sentence = "$" + sender +"MWV," +angle.toFixed(2) + ",R," + speed.toFixed(2) + ",K,A";
@@ -340,8 +343,8 @@ function getOptions(){
 		_remember[scriptName] = scriptName;	// our fingerprint in _remember
 		_remember.options = {
 			fileString:"",			// file string for recording
-			interval: 5,			// recording interval in seconds
-			distance: 0,			// minimum distance between records
+			interval: 30,			// recording interval in seconds
+			distance: 0.02,			// minimum distance between records
 			lastPosition: false,	// position at last recordings
 			status: "stopped",
 			autoStart: false
@@ -362,13 +365,11 @@ function cancelAlert(){
 
 function tidyUp(){
 	consoleName(scriptName);
-print(JSON.stringify(_remember, null, "\t"), "\n");
 	}
 
 function checkVersion(){
 	if (OCPNgetPluginConfig().PluginVersionMajor < 3) throw(scriptName + " requires plugin v3 or later.");
 	if (!OCPNisOnline()) return;
-
 	if (_remember == undefined) _remember = {};
 	now = Date.now();
 	if (_remember.hasOwnProperty("versionControl")){
@@ -391,7 +392,7 @@ function checkVersion(){
 		if (response == 2){
 			require("Consoles");
 			consoleLoad(scriptName, scriptURL);
-			message = "Script updated.\nYou need to save it loaclly if you want to run it off-line"
+			message = "Script updated.\nYou need to save it locally if you want to run it off-line"
 				+ "\nYou can now run the updated script.";
 			messageBox(message);
 			stopScript("Script updated");
