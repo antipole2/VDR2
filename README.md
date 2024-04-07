@@ -54,12 +54,13 @@ In this mode, if recording was in progress when the script stopped (or the plugi
 #### Calling up the control panel
 
 When a control panel choice has been made, the panel is no longer displayed. All that is visible is the parked console.  To summon up the control panel - perhaps to start, stop of pause recording, you click on the console's close button.
-
-(This seems counter-intuitive but that is how it is.)
+(This may seem counter-intuitive but that is how it is.)
 
 ## Installing the script
 
-1. Copy this URL to your clipboard (copy link - do not follow it) - `https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js`
+You need the JavaScript plugin v3 or later.
+
+1. Copy this URL to your clipboard (copy the link - do not follow it) - `https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js`
 2. In a JavaScript console choose `Load` and then `URL on clipboard`.  The script should be loaded into the script pane.
 3. Choose `Run` to start the script.
 
