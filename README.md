@@ -80,5 +80,5 @@ To discuss this script's functionality, use the Discussions tab above.
 `logToDisplay = false;	// data will appear in the output pane`  
 
 2. The script options are stored in the console's `_remember` variable.  They thus endure between script runs and across OpenCPN restarts (provided OpenCPN quits gracefully).  The `_remember` variable is unique to the console.  Should you run the script in a different console, it will have fresh option settings.
-3. 
+  
 4. There is a [description of how the script works](https://github.com/antipole2/VDR2/blob/main/how_this_scriptworks%20.md), which should help understnd it.  It also describes the programming tachniques that could be useful elsewhere.
