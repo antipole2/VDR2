@@ -9,8 +9,8 @@ omit = [	// NMEA0183 sentences to omit
 	// add here any others to be omitted
 	];
 
-logToFile = true;		// data added to file
 logToDisplay = false;	// data will appear in the output pane
+logToFile = true;		// data added to file
 
 n2kConverters = {
 	// Link NMEA2k pgns to their coverter function
@@ -262,8 +262,8 @@ function capture(){
 
 	// process the stashed N2k data
 	// uncomment next lines two inject simuated data for debugging
-	n2kStash[128267] = [147,19,255,11,245,1,255,255,155,107,24,19,8,255,90,1,0,0,50,251,255];	// water depth
-	n2kStash[130306] = [147,19,255,2,253,1,255,255,220,107,24,19,6,255,220,5,188,122,251];		// wind
+//	n2kStash[128267] = [147,19,255,11,245,1,255,255,155,107,24,19,8,255,90,1,0,0,50,251,255];	// water depth
+//	n2kStash[130306] = [147,19,255,2,253,1,255,255,220,107,24,19,6,255,220,5,188,122,251];		// wind
 
 	keys =  Object.keys(n2kStash);
 	if (trace2k) print("N2k keys: ", keys, "\n");
@@ -273,15 +273,6 @@ function capture(){
 		if (trace2k) print(i, "\t", key, "\t", payload, "\n");
 		decoded = n2Kobjects[key].decode(payload);
 		n2kConverters[key](decoded);
-/*
-		switch (key){
-			case 128267: decode128267(decoded);
-				break;
-			case 130306: decode130306(decoded);
-				break;
-			default: throw("NMEA2k pgn " + keys[i] + " unexpected - logic error");
-			}
-*/
 		}
 	n2kStash = {};
 	if (logToDisplay) print(buffer);
