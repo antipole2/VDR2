@@ -73,6 +73,9 @@ This script has automatic checking for updates.
 
 To discuss this script's functionality, use the Discussions tab above.
 
-## Technical note
+## Technical notes
 
-The script options are stored in the console's `_remember` variable.  They thus endure between script runs and across OpenCPN restarts (provided OpenCPN quits gracefully).  The `_remember` variable is unique to the console.  Should you run the script in a different console, it will have fresh option settings.
+1. If you want to see what is being written to the file without having to look inside, change `false` to `true` in the following line  
+`logToDisplay = false;	// data will appear in the output pane`  
+
+2. The script options are stored in the console's `_remember` variable.  They thus endure between script runs and across OpenCPN restarts (provided OpenCPN quits gracefully).  The `_remember` variable is unique to the console.  Should you run the script in a different console, it will have fresh option settings.
