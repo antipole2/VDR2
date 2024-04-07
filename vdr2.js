@@ -377,7 +377,7 @@ function checkVersion(){
 	if (_remember.hasOwnProperty("versionControl")){
 		lastCheck = _remember.versionControl.lastCheck;
 		if (trace) print("versionControl.lastCheck was ", lastCheck, "\n");
-		checkDays = 5;	// how often to check
+		checkDays = 2;	// how often to check
 
 		if (now < (lastCheck + checkDays*24*60*60*1000)){
 			if (trace) print("No version check due\n");
