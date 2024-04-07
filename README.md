@@ -54,12 +54,13 @@ In this mode, if recording was in progress when the script stopped (or the plugi
 #### Calling up the control panel
 
 When a control panel choice has been made, the panel is no longer displayed. All that is visible is the parked console.  To summon up the control panel - perhaps to start, stop of pause recording, you click on the console's close button.
-
-(This seems counter-intuitive but that is how it is.)
+(This may seem counter-intuitive but that is how it is.)
 
 ## Installing the script
 
-1. Copy this URL to your clipboard (copy link - do not follow it) - `https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js`
+You need the JavaScript plugin v3 or later.
+
+1. Copy this URL to your clipboard (copy the link - do not follow it) - `https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js`
 2. In a JavaScript console choose `Load` and then `URL on clipboard`.  The script should be loaded into the script pane.
 3. Choose `Run` to start the script.
 
@@ -73,6 +74,9 @@ This script has automatic checking for updates.
 
 To discuss this script's functionality, use the Discussions tab above.
 
-## Technical note
+## Technical notes
 
-The script options are stored in the console's `_remember` variable.  They thus endure between script runs and across OpenCPN restarts (provided OpenCPN quits gracefully).  The `_remember` variable is unique to the console.  Should you run the script in a different console, it will have fresh option settings.
+1. If you want to see what is being written to the file without having to look inside, change `false` to `true` in the following line  
+`logToDisplay = false;	// data will appear in the output pane`  
+
+2. The script options are stored in the console's `_remember` variable.  They thus endure between script runs and across OpenCPN restarts (provided OpenCPN quits gracefully).  The `_remember` variable is unique to the console.  Should you run the script in a different console, it will have fresh option settings.
