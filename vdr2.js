@@ -10,7 +10,7 @@ omit = [	// NMEA0183 sentences to omit
 	];
 
 logToFile = true;		// data added to file
-logToDisplay = false;		// data will appear in the output pane
+logToDisplay = false;	// data will appear in the output pane
 
 n2kConverters = {
 	// Link NMEA2k pgns to their coverter function
@@ -18,11 +18,11 @@ n2kConverters = {
 	130306: convert130306	// wind
 	};
 
+const scriptVersion = 1.0;
+
+// Declarations in outermost scope
 const scriptName = "VDR2";
 consoleName(scriptName);
-const scriptVersion = 1.0;
-checkVersion();
-// Declarations in outermost scope
 const sender = "VL";	// NMEA0183 sender for generated sentences
 const dialogueCaption = [{type:"caption", value:scriptName}];
 var options;
@@ -37,9 +37,10 @@ var fileModeIndex;
 // debugging settings
 trace = false;
 trace2k = false;	// trace just in N2K
-// _remember = {};	// uncomment to force first time - normally commented out
+// _remember = undefined;	// uncomment to force first time - normally commented out
 if (!trace && !trace2k) consolePark();
-
+checkVersion();
+if (!logToFile) advise(10, "Writing to file disabled");
 // set ourselves up
 Position = require("Position");
 File = require("File");
@@ -372,18 +373,26 @@ function checkVersion(){
 	if (!OCPNisOnline()) return;
 	if (_remember == undefined) _remember = {};
 	now = Date.now();
+	if (trace) print("Now: ", now, "\n");
 	if (_remember.hasOwnProperty("versionControl")){
 		lastCheck = _remember.versionControl.lastCheck;
+		if (trace) print("versionControl.lastCheck was ", lastCheck, "\n");
 		checkDays = 5;	// how often to check
-		if (now < (lastCheck + checkDays*24*60*60*1000)) return;
+
+		if (now < (lastCheck + checkDays*24*60*60*1000)){
+			if (trace) print("No version check due\n");
+			return;
+			}
 		_remember.versionControl.lastCheck = now;
 		}
 	else _remember.versionControl = {"lastCheck":0};
+	if (trace) print("versionControl.lastCheck updated to ", now, "\n");
 	versionCheckURL = "https://raw.githubusercontent.com/antipole2/VDR2/main/version.JSON";
 	scriptURL = "https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js"
 	details = JSON.parse(readTextFile(versionCheckURL));
 	if (scriptVersion < details.version){
-		message = "Script update to version " + details.version + " available."
+		message = "\You have script version " + scriptVersion
+			+ "\nUpdate to version " + details.version + " available."
 			+ "\nDate: " + details.date + "\nNew: " + details.new
 			+ "\n \nUpdating will lose any local changes you have made\nYou need to save these first"
 			+ "\nTo supress update prompts, disable the call to checkVersion"
@@ -391,7 +400,7 @@ function checkVersion(){
 		response = messageBox(message, "YesNo");
 		if (response == 2){
 			require("Consoles");
-			consoleLoad(scriptName, scriptURL);
+			consoleLoad(consoleName(), scriptURL);
 			message = "Script updated.\nYou need to save it locally if you want to run it off-line"
 				+ "\nYou can now run the updated script.";
 			messageBox(message);
@@ -399,4 +408,5 @@ function checkVersion(){
 			}
 		else _remember.versionControl.lastCheck = now;
 		}
+	else if (trace) print("Version already up to date\n");
 	}
