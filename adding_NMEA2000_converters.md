@@ -33,7 +33,7 @@ The print of the object will show you the attributes of the object.
 Following the example above, you can build the NMEA0183 sentence (or sentences) to represent the NME2000 data.
 You can print it out with
 
-`print(sentence, "'n");`
+`print(sentence, "\n");`
 
 When you are satisfied with that, add back the final statement, which adds your sentence and its checksum to the output buffer.
 You can then comment out your print statements.
