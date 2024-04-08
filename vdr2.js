@@ -18,7 +18,7 @@ n2kConverters = {
 	130306: convert130306	// wind
 	};
 
-const scriptVersion = 1.0;
+const scriptVersion = 1.1;
 
 // Declarations in outermost scope
 const scriptName = "VDR2";
