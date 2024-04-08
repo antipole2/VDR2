@@ -262,8 +262,8 @@ function capture(){
 
 	// process the stashed N2k data
 	// uncomment next lines two inject simuated data for debugging
-//	n2kStash[128267] = [147,19,255,11,245,1,255,255,155,107,24,19,8,255,90,1,0,0,50,251,255];	// water depth
-//	n2kStash[130306] = [147,19,255,2,253,1,255,255,220,107,24,19,6,255,220,5,188,122,251];		// wind
+	// n2kStash[128267] = [147,19,255,11,245,1,255,255,155,107,24,19,8,255,90,1,0,0,50,251,255];	// water depth
+	// n2kStash[130306] = [147,19,255,2,253,1,255,255,220,107,24,19,6,255,220,5,188,122,251];		// wind
 
 	keys =  Object.keys(n2kStash);
 	if (trace2k) print("N2k keys: ", keys, "\n");
@@ -322,7 +322,14 @@ function convert130306(obj){	// wind
 	if (trace2k) print(JSON.stringify(obj, null, "\t"), "\n");
 	angle = obj.windAngle * 57.29578;	// angle from radians to degrees
 	speed = obj.windSpeed * 1.943844;	// speed from m/s to knots
-	sentence = "$" + sender +"MWV," +angle.toFixed(2) + ",R," + speed.toFixed(2) + ",K,A";
+	switch (obj.reference){
+		case "Apparent":
+			ref = "R"; break;
+		case "True (boat referenced)":
+			ref = "T"; break;
+		default: throw("PGN130306 has unsupported reference " + obj.reference + " please report this");
+		}
+	sentence = "$" + sender +"MWV," +angle.toFixed(2) + "," + ref + "," + speed.toFixed(2) + ",K,A";
 	buffer += sentence + "*" + NMEA0183checksum(sentence) + "\n";
 	}
 	
