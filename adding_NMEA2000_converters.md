@@ -14,12 +14,19 @@ The converter function is:
 ````
 function convert130306(obj){	// wind
 	var sentence;
-	// print(JSON.stringify(obj, null, "\t"), "\n");
+	if (trace2k) print(JSON.stringify(obj, null, "\t"), "\n");
 	angle = obj.windAngle * 57.29578;	// angle from radians to degrees
 	speed = obj.windSpeed * 1.943844;	// speed from m/s to knots
-	sentence = "$" + sender +"MWV," + angle.toFixed(2) + ",R," + speed.toFixed(2) + ",K,A";
+	switch (obj.reference){
+		case "Apparent":
+			ref = "R"; break;
+		case "True (boat referenced)":
+			ref = "T"; break;
+		default: throw("PGN130306 has unsupported reference " + obj.reference + " please report this");
+		}
+	sentence = "$" + sender +"MWV," +angle.toFixed(2) + "," + ref + "," + speed.toFixed(2) + ",K,A";
 	buffer += sentence + "*" + NMEA0183checksum(sentence) + "\n";
-  }
+	}
 ````
 
 The function is passed the JavaScript object containing the decoded data.
