@@ -1,5 +1,6 @@
-{"name":"VDR2",
+{	"name":"VDR2",
 	"version":1.1,
 	"date":"8 Apr 2024",
-	"new":"Fix for PGN 130306 -> MWV conversion"
+	"new":"Fix for PGN 130306 -> MWV conversion",
+	"comment": "Don't forget to set same version number in the script too!"
 }
