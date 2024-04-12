@@ -2,6 +2,6 @@
 	"version":1.1,
 	"date":"8 Apr 2024",
 	"new":"Fix for PGN 130306 -> MWV conversion",
-	"pluginMinVersion": 3.0.1,
+	"pluginMinVersion": 3.6,
 	"comment": "Don't forget to set same version number in the script too!"
 }
