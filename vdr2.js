@@ -25,6 +25,7 @@ const scriptName = "VDR2";
 consoleName(scriptName);
 const sender = "VL";	// NMEA0183 sender for generated sentences
 const dialogueCaption = [{type:"caption", value:scriptName}];
+File = require("File");
 var options;
 var nmeaStash = {};
 var n2kStash = {};
@@ -32,14 +33,14 @@ var n2Kobjects = {};	// to hold the NMEA2000 objects
 var logFile;		// the log file object
 var intervalIndex;	// indexes into dialogues declared in outer scope
 var fileModeIndex;
-
+var autoIndex;
 
 // debugging settings
 trace = false;
 trace2k = false;	// trace just in N2K
 // _remember = undefined;	// uncomment to force first time - normally commented out
 if (!trace && !trace2k) consolePark();
-checkVersion();
+checkForUpdates();
 if (!logToFile) advise(10, "Writing to file disabled");
 // set ourselves up
 Position = require("Position");
@@ -48,153 +49,51 @@ NMEA2000 = require("NMEA2000");
 onExit(tidyUp);
 getOptions();
 haveN2k = setupN2k();	// set true if we have N2k connection
+if (trace) print(options, "\n");
 
 // decide on initial action
-if (options.fileString == "") chooseFile();	// if no file, force selection
-else {
-	if (options.status == "recording"){	// must have quit while recording
-		if (options.autoStart) {
-			advise(5, "Recording resumed");
-			startRecording("Append (auto start)");
-			}
-		else	options.status = "stopped";
+if (options.status == "recording"){	// must have quit while recording
+	if (options.autoStart) {
+		if (trace) print("Resuming recordings\n");
+		logFile = new File(options.fileString, "APPEND");
+		advise(10, "Recording resumed");
+		resumeRecording();
 		}
 	else	options.status = "stopped";
-	onCloseButton(actionDialogue);
 	}
-// end of start up
-
-function chooseFile(){
-	if (trace) print("In chooseFile\n");
-	dialogue = [].concat(dialogueCaption);
-	existingFile = options.fileString;
-	if (existingFile == "") existingFile = "No recording file selected";
-	dialogue.push({type:"text", width:1000, value: existingFile});
-	dialogue.push({type: "radio", value:["New", "Overwrite", "Append"]});
-	dialogue.push({type: "button", label:["Quit", "Dismiss", "Choose file"]});
-	if (trace) print(dialogue, "\n");
-	onDialogue(chooseFileResponse, dialogue);
+else	{
+	options.status = "stopped";
+	onCloseButton();	// work around for JS v3.0.1 - fixed in next
+	onCloseButton(mainDialogue);
 	}
+// end of start up	
 
-function chooseFileResponse(response){
-	if (trace) print("In chooseFileResponse\n");
-	button = response[response.length-1].label;
-	if (button == "Quit") stopScript("Quit");
-	else if (button == "Dismiss") 	onCloseButton(actionDialogue);
-	else if (button == "Choose file"){
-		if (trace) print("To choose file\n");
-		access = response[2].value;
-		if (access == "New") options.mode = WRITE_EXCL;
-		else if (access == "Overwrite") options.mode = WRITE;
-		else if (access == "Append") options.mode = APPEND;
-		else throw("Logic error 2 in chooseFile");
-		try {
-			options.fileString = getFileString("??", options.mode);
-			}
-		catch(err){	// likely cancelled
-			chooseFile();
-			return;
-			}
-		actionDialogue();
+function startRecording(fileString, mode){
+	if (trace) print("startRecording ", fileString, "\t", mode,"\n");
+	// for unknown reasons, fileString needs to be in wider context variaable
+	options.fileString = fileString;
+	accessOK = true;
+	try {
+		logFile = new File(options.fileString, mode);
 		}
-	else throw("Logic error 2 in chooseFile");
-	};
-	
-function actionDialogue(){
-	if (trace) print("In actionDialogue\n");
-	if (options.fileString == "") {
+	catch(err){
+		accessOK = false;
+		}
+	options.fileString = logFile.fileString;
+	if (!accessOK) {
+		advise(7, "Unable to access file in required mode");
 		chooseFile();
 		return;
 		}
-	dialogue = [].concat(dialogueCaption);
-	dialogue.push({type:"text", width:1000, value: "File: " + options.fileString});
-	switch (options.status){
-		case "recording":
-			buttons = ["Stop script", "Dismiss", "Pause", "End"];
-			break;
-		case "paused":
-			buttons = ["Stop script", "Dismiss", "Resume", "End"];
-			break;
-		case "stopped":
-			buttons = ["Stop script", "Dismiss", "Record"];
-			}
-	if ((options.status != "recording")  && (options.status != "paused")){
-		dialogue.push({type: "button", label:"Change file"});
-		dialogue.push({type: "hLine"});
-		}
-	if ((options.status == "paused") || (options.status == "stopped")){
-		intervalIndex = dialogue.length;
-		dialogue.push({	type:"field", label:"Recording every", width:50,value:(options.interval), suffix:"seconds"});
-		}
-	if ((options.status == "paused") || (options.status == "stopped")){
-		distanceIndex = dialogue.length;
-		dialogue.push({	type:"field", label:"Minimum distance", width:60,value:(options.distance), suffix:"nm"});
-		}
-	if ((options.status != "recording")  && (options.status != "paused")){
-		fileModeIndex = dialogue.length;
-		dialogue.push({type:"radio", value:["Overwrite", (options.mode == APPEND)?"*Append":"Append", "Append (auto start)"]});
-		}
-	dialogue.push({type: "button", label:buttons});
-	onDialogue(actionResponse, dialogue);
-	}
-
-function actionResponse(response){
-	if (trace) print("In actionResponse\n");
-	button = response[response.length-1].label;
-	switch (button){
-		case "Stop script": stopScript("Script stopped");
-		case "Dismiss":
-			break;
-		case "End":
-			onSeconds();	// cancel timers
-			OCPNonNMEA0183();
-			OCPNonNMEA2000();
-			delete logFile;	//closes - does not delete file
-			options.status = "stopped"
-			consoleName(scriptName + "_" + options.status);
-			break;
-		case "Pause":
-			onSeconds();	// cancel timers
-			OCPNonNMEA0183();	// and inputs
-			OCPNonNMEA2000();
-			options.status = "paused";
-			consoleName(scriptName + "_" + options.status);
-			actionDialogue();
-			return;
-		case "Record":
-			how = response[fileModeIndex].value;
-			options.interval = Number(response[intervalIndex].value);	// pick up interval
-			if (options.interval < 1) options.interval = 1;	// minimum recording interval
-			options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
-			if (options.distance < 0) options.distance = 0;
-			startRecording(how);
-			break;
-		case "Resume":
-			options.interval = Number(response[intervalIndex].value);	// pick up interval
-			if (options.interval < 1) options.interval = 1;	// minimum recording interval
-			options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
-			if (options.distance < 0) options.distance = 0;
-			resumeRecording();
-			break;
-		case "Change file":
-			chooseFile();
-			return;	// do not fall through to avoid extra call to onCloseButton 
-		}
-	onCloseButton(actionDialogue);
-	}
-
-function startRecording(how){
-	if (trace) print("startRecording ", how,"\n");
-	if (how == "Overwrite") mode = WRITE;
-	else mode = APPEND;
-	options.autoStart = (how == "Append (auto start)")?true:false
-	logFile = new File(options.fileString, mode);
 	options.status = "recording";
 	consoleName(scriptName+ "_"  + options.status);
 	nmeaBuffer = {};
 	OCPNonAllNMEA0183(nmea0183Capture);
 	startN2k();
 	onAllSeconds(capture, options.interval);
+	onCloseButton();
+	onCloseButton(inActionDialogue);
+	oneTimeAdvice();
 	}
 
 function resumeRecording(){
@@ -204,6 +103,17 @@ function resumeRecording(){
 	OCPNonAllNMEA0183(nmea0183Capture);
 	startN2k();
 	onAllSeconds(capture, options.interval);
+	onCloseButton(inActionDialogue);
+	}
+
+function stopRecording(){
+	onSeconds();	// cancel timers
+	OCPNonNMEA0183();
+	OCPNonNMEA2000();
+	delete logFile;	//closes - does not delete file
+	options.status = "stopped"
+	consoleName(scriptName + "_" + options.status);
+	onCloseButton(mainDialogue);
 	}
 
 function startN2k(){	// start listening for N2K	
@@ -324,8 +234,10 @@ function convert130306(obj){	// wind
 	speed = obj.windSpeed * 1.943844;	// speed from m/s to knots
 	switch (obj.reference){
 		case "Apparent":
+		case 2:
 			ref = "R"; break;
 		case "True (boat referenced)":
+		case 3:
 			ref = "T"; break;
 		default: throw("PGN130306 has unsupported reference " + obj.reference + " please report this");
 		}
@@ -344,14 +256,158 @@ function getOptions(){
 			fileString:"",			// file string for recording
 			interval: 30,			// recording interval in seconds
 			distance: 0.02,			// minimum distance between records
-			lastPosition: false,	// position at last recordings
+			lastPosition: false,		// position at last recordings
 			status: "stopped",
-			autoStart: false
+			autoStart: false,
+			adviceGiven: false
 			}
-		advise(10, "To call up the settings panel\nwhen script is running\nclick on the console close button");
+		advise(20, "To call up the settings panel\nwhen script is running\nclick on the console close button");
 		}
 	options = _remember.options;	// for convenience
 	}
+
+function addOptions(dialogue){
+	intervalIndex = dialogue.length;
+	dialogue.push({	type:"field", label:"Recording every", width:50,value:(options.interval), suffix:"seconds"});
+		distanceIndex = dialogue.length;
+	dialogue.push({	type:"field", label:"Minimum distance", width:60,value:(options.distance), suffix:"nm"})
+	dialogue.push({type:"hLine"});
+	return dialogue;
+	}
+
+function mainDialogue(){
+	if (trace) print("In main dialogue\n");
+	var dialogue = [{type:"caption", value:scriptName}];
+	dialogue = addOptions(dialogue);
+	switch (options.status){
+		case "stopped":
+			dialogue.push({type:"button", label:"Select existing file"});
+			if (options.fileString != ""){
+				dialogue.push({type:"text", value:"Selected file " + options.fileString});
+				dialogue.push({type:"button", label:["Record overwriting", "Record appending"]});
+				}
+			dialogue.push({type:"hLine"});
+			dialogue.push({type:"button", label:"Record to new file"});
+			autoIndex = dialogue.length;
+			tickText = "Resume recording on restart";
+			dialogue.push({type: "tick", value: options.autoStart ? ("*" + tickText):tickText});
+			break;
+		case "paused":
+			dialogue.push({type:"button", label:["Resume", "End"]});
+			break;
+		}
+	dialogue.push({type:"hLine"});
+	dialogue.push({type:"button", label:["Stop script", "Dismiss"]});
+	onDialogue(mainDialogeResponse, dialogue);
+	}
+
+function collectDetails(response){
+	options.interval = Number(response[intervalIndex].value);	// pick up interval
+	if (options.interval < 1) options.interval = 1;	// minimum recording interval
+	options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
+	if (options.distance < 0) options.distance = 0;
+	options.autoStart = response[autoIndex].value;
+	}
+
+function mainDialogeResponse(response){
+	button = response[response.length-1].label;
+	switch (button){
+		case "Select existing file":
+			options.fileString = getFileString("??", WRITE);
+			mainDialogue();
+			return;
+		case "Record to new file":
+			collectDetails(response);
+			startRecording("??", WRITE_EXCL);
+			return;
+		case "Record overwriting":
+			collectDetails(response);
+			startRecording(options.fileString, WRITE);
+			return;
+		case "Record appending":
+			collectDetails(response);
+			startRecording(options.fileString, APPEND);
+			return;
+		case "Resume":
+			resumeRecording();
+			return;
+		case "End":
+			stopRecording();
+			return;
+		case "Stop script":
+			stopScript("Script stopped");
+			return;
+		case "Dismiss":
+			options.autoStart = response[autoIndex].value;
+			onCloseButton();
+			onCloseButton(mainDialogue);
+			oneTimeAdvice();
+			return;
+		}	
+	}
+
+function inActionDialogue(){
+	if (trace) print("inActionDialogue\n", JSON.stringify(options, null, "\t"), "\n");
+	if (options.fileString == "") {
+		chooseFile();
+		return;
+		}
+	dialogue = [].concat(dialogueCaption);
+	dialogue.push({type:"text", width:1000, value: "File: " + options.fileString});
+	switch (options.status){
+		case "recording":
+			buttons = ["Stop script", "Dismiss", "Pause", "End"];
+			break;
+		case "paused":
+			buttons = ["Stop script", "Dismiss", "Resume", "End"];
+			break;
+		case "stopped":
+			if (options.mode == WRITE_EXCL) buttons = ["Stop script", "Dismiss", "Record"];
+			else buttons = ["Stop script", "Dismiss", "Record overwriting", "Record appending"];
+			}
+	if ((options.status != "recording")  && (options.status != "paused")){
+		dialogue.push({type: "button", label:"Change file"});
+		dialogue.push({type: "hLine"});
+		}
+	if ((options.status == "paused") || (options.status == "stopped")){
+		intervalIndex = dialogue.length;
+		dialogue.push({	type:"field", label:"Recording every", width:50,value:(options.interval), suffix:"seconds"});
+		}
+	if ((options.status == "paused") || (options.status == "stopped")){
+		distanceIndex = dialogue.length;
+		dialogue.push({	type:"field", label:"Minimum distance", width:60,value:(options.distance), suffix:"nm"});
+		}
+	if ((options.status != "recording")  && (options.status != "paused")){
+		autoIndex = dialogue.length;
+		dialogue.push({type: "tick", value: "Resume recording on restart"});
+		}
+	dialogue.push({type: "button", label:buttons});
+	onDialogue(inActionResponse, dialogue);
+	}
+
+function inActionResponse(response){
+	if (trace) print("inActionResponse\n");
+	button = response[response.length-1].label;
+	switch (button){
+		case "Stop script": stopScript("Script stopped");
+		case "Dismiss":
+			break;
+		case "End":
+			stopRecording();
+			break;
+		case "Pause":
+			onSeconds();	// cancel timers
+			OCPNonNMEA0183();	// and inputs
+			OCPNonNMEA2000();
+			options.status = "paused";
+			consoleName(scriptName + "_" + options.status);
+			break; 
+		}
+	onCloseButton();
+	onCloseButton(mainDialogue);
+	oneTimeAdvice();
+	}
+
 
 function advise(time, message){	// timed alert
 	alert(message);
@@ -362,49 +418,22 @@ function cancelAlert(){
 	alert(false);
 	}
 
+function oneTimeAdvice(){
+	if (options.adviceGiven) return;
+	advice = "To bring up the script controls again\nclick on the console's Close button";
+	advise(20, advice);
+	options.adviceGiven = true;
+	}
+
 function tidyUp(){
 	consoleName(scriptName);
 	}
 
-function checkVersion(){
-	if (OCPNgetPluginConfig().PluginVersionMajor < 3) throw(scriptName + " requires plugin v3 or later.");
+function checkForUpdates(){
 	if (!OCPNisOnline()) return;
-	if (_remember == undefined) _remember = {};
-	now = Date.now();
-	if (trace) print("Now: ", now, "\n");
-	if (_remember.hasOwnProperty("versionControl")){
-		lastCheck = _remember.versionControl.lastCheck;
-		if (trace) print("versionControl.lastCheck was ", lastCheck, "\n");
-		checkDays = 2;	// how often to check
-
-		if (now < (lastCheck + checkDays*24*60*60*1000)){
-			if (trace) print("No version check due\n");
-			return;
-			}
-		_remember.versionControl.lastCheck = now;
-		}
-	else _remember.versionControl = {"lastCheck":0};
-	if (trace) print("versionControl.lastCheck updated to ", now, "\n");
-	versionCheckURL = "https://raw.githubusercontent.com/antipole2/VDR2/main/version.JSON";
-	scriptURL = "https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js"
-	details = JSON.parse(readTextFile(versionCheckURL));
-	if (scriptVersion < details.version){
-		message = "\You have script version " + scriptVersion
-			+ "\nUpdate to version " + details.version + " available."
-			+ "\nDate: " + details.date + "\nNew: " + details.new
-			+ "\n \nUpdating will lose any local changes you have made\nYou need to save these first"
-			+ "\nTo supress update prompts, disable the call to checkVersion"
-			+ "\nUpdate now?";
-		response = messageBox(message, "YesNo");
-		if (response == 2){
-			require("Consoles");
-			consoleLoad(consoleName(), scriptURL);
-			message = "Script updated.\nYou need to save it locally if you want to run it off-line"
-				+ "\nYou can now run the updated script.";
-			messageBox(message);
-			stopScript("Script updated");
-			}
-		else _remember.versionControl.lastCheck = now;
-		}
-	else if (trace) print("Version already up to date\n");
+	check = require("https://raw.githubusercontent.com/antipole2/JavaScript_pi/master/onlineIncludes/checkForUpdates.js");
+	check(scriptVersion, days = 0,
+		"https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js",	// url of script
+		"https://raw.githubusercontent.com/antipole2/VDR2/main/version.JSON"// url of version JSON
+		);
 	}
