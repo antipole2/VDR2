@@ -444,8 +444,9 @@ function tidyUp(){
 function checkForUpdates(){
 	if (!OCPNisOnline()) return;
 	check = require("https://raw.githubusercontent.com/antipole2/JavaScript_pi/master/onlineIncludes/checkForUpdates.js");
-	check(scriptVersion, days = 0,
+	check(scriptVersion, days = 2,
 		"https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js",	// url of script
 		"https://raw.githubusercontent.com/antipole2/VDR2/main/version.JSON"// url of version JSON
 		);
 	}
+
