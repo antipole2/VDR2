@@ -1,5 +1,5 @@
 {	"name":"VDR2",
-	"version":1.1.1,
+	"version":"1.1.1",
 	"date":"12 Apr 2024",
 	"new":"Fix for PGN 130306 -> MWV conversion\nNew file control\nCan now create new file",
 	"pluginMinVersion": 3.0,
