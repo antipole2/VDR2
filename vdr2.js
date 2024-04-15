@@ -1,6 +1,5 @@
 // record NMEA data to file
 // Uses OCPN for navigational data so it works whatever its source (N2K, SignalK etc.)
-
 omit = [	// NMEA0183 sentences to omit
 	"GLL",	// taken from OCPN navigation
 	"HDG",	// taken from OCPN navigation
@@ -18,7 +17,7 @@ n2kConverters = {
 	130306: convert130306	// wind
 	};
 
-const scriptVersion = 1.1;
+const scriptVersion = "1.1.1";
 
 // Declarations in outermost scope
 const scriptName = "VDR2";
@@ -40,7 +39,6 @@ trace = false;
 trace2k = false;	// trace just in N2K
 // _remember = undefined;	// uncomment to force first time - normally commented out
 if (!trace && !trace2k) consolePark();
-checkForUpdates();
 if (!logToFile) advise(10, "Writing to file disabled");
 // set ourselves up
 Position = require("Position");
@@ -48,11 +46,16 @@ File = require("File");
 NMEA2000 = require("NMEA2000");
 onExit(tidyUp);
 getOptions();
+checkForUpdates();
 haveN2k = setupN2k();	// set true if we have N2k connection
 if (trace) print(options, "\n");
 
 // decide on initial action
-if (options.status == "recording"){	// must have quit while recording
+if (options.status == "firstTime"){
+	options.status = "stopped";
+	mainDialogue();
+	}
+else if (options.status == "recording"){	// must have quit while recording
 	if (options.autoStart) {
 		if (trace) print("Resuming recordings\n");
 		logFile = new File(options.fileString, "APPEND");
@@ -233,7 +236,7 @@ function convert130306(obj){	// wind
 	angle = obj.windAngle * 57.29578;	// angle from radians to degrees
 	speed = obj.windSpeed * 1.943844;	// speed from m/s to knots
 	ref = obj.reference;
-	if (typeof ref == "object") ref = ref.value;	// handle possibly revised NMEA2000
+	if (typeof ref == "object") ref = ref.value;	// handle revised NMEA2000
 	switch (ref){
 		case "Apparent":
 		case 2:
@@ -259,11 +262,12 @@ function getOptions(){
 			interval: 30,			// recording interval in seconds
 			distance: 0.02,			// minimum distance between records
 			lastPosition: false,		// position at last recordings
-			status: "stopped",
+			status: "firstTime",
 			autoStart: false,
 			adviceGiven: false
 			}
-		advise(20, "To call up the settings panel\nwhen script is running\nclick on the console close button");
+		if (_remember.hasOwnProperty("versionControl"))	// clear any previous version control
+			_remember.versionControl = undefined;
 		}
 	options = _remember.options;	// for convenience
 	}
@@ -304,30 +308,36 @@ function mainDialogue(){
 	}
 
 function collectDetails(response){
-	options.interval = Number(response[intervalIndex].value);	// pick up interval
-	if (options.interval < 1) options.interval = 1;	// minimum recording interval
-	options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
-	if (options.distance < 0) options.distance = 0;
-	options.autoStart = response[autoIndex].value;
+	if (typeof response[intervalIndex] != "undefined"){
+		options.interval = Number(response[intervalIndex].value);	// pick up interval
+		if (options.interval < 1) options.interval = 1;	// minimum recording interval
+		}
+	if (typeof response[distanceIndex] != "undefined"){
+		options.distance = Number(response[distanceIndex].value);	// pick up minimum distance
+		if (options.distance < 0) options.distance = 0;
+		}
+	if (typeof  response[autoIndex] != "undefined")
+		options.autoStart = response[autoIndex].value;
 	}
 
 function mainDialogeResponse(response){
 	button = response[response.length-1].label;
+	collectDetails(response);
 	switch (button){
 		case "Select existing file":
 			options.fileString = getFileString("??", WRITE);
 			mainDialogue();
 			return;
 		case "Record to new file":
-			collectDetails(response);
+//			collectDetails(response);
 			startRecording("??", WRITE_EXCL);
 			return;
 		case "Record overwriting":
-			collectDetails(response);
+//			collectDetails(response);
 			startRecording(options.fileString, WRITE);
 			return;
 		case "Record appending":
-			collectDetails(response);
+//			collectDetails(response);
 			startRecording(options.fileString, APPEND);
 			return;
 		case "Resume":
@@ -340,9 +350,9 @@ function mainDialogeResponse(response){
 			stopScript("Script stopped");
 			return;
 		case "Dismiss":
-			options.autoStart = response[autoIndex].value;
+//			options.autoStart = response[autoIndex].value;
 			onCloseButton();
-			onCloseButton(mainDialogue);
+			onCloseButton((options.status == "recording")?inActionDialogue:mainDialogue);
 			oneTimeAdvice();
 			return;
 		}	
@@ -406,7 +416,7 @@ function inActionResponse(response){
 			break; 
 		}
 	onCloseButton();
-	onCloseButton(mainDialogue);
+	onCloseButton((options.status == "recording")?inActionDialogue:mainDialogue);
 	oneTimeAdvice();
 	}
 
