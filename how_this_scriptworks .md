@@ -45,9 +45,9 @@ The rest of the script comprises subroutine functions or those invoked to servic
 
 ## The control dialogues
 
-The first four functions manage the dialogues.
-
-There are two dialogues - one for file selection and one for controlling recording.
+There are two dialogues.
+The main one is used to start recording.
+There is a secondary one used to pause or end recording.
 They are both created by the `onDialogue` function, described in the User Guide.
 
 The `onDialogue` function arguments are the name of the function to be invoked when the user clicks on a button and an array defining the elements of the dialogue to be created.
@@ -77,7 +77,7 @@ There follow functions to start or resume recording
 
 ## Stashing data
 
-When NMEA0183 data is received, it isha ndled by `nmea0183Capture`.
+When NMEA0183 data is received, it is handled by `nmea0183Capture`.
 After filtering out sentences not to be recodred, it stashes them.
 
 The stash is a structure where the attributes are the NMEA sentence type.
@@ -104,7 +104,7 @@ This is, therefore, done once at the start for each PGN rather than each time da
 This examines the comms ports to locate any N2K one.
 As written, it uses the first one found.
 
-It then constructs anNMEA2000 object for each PGN and stoes it in the n2Kobjects with the PGN as its attribute - thus making access easy.
+It then constructs an NMEA2000 object for each PGN and stoes it in `n2Kobjects` with the PGN as its attribute - thus making access easy.
 
 ## Handling NMEA2000 data
 
@@ -131,10 +131,12 @@ It checks whether we are online and if the required time has elased since the la
 If a check is due, it reads a version control file `version.JSON`from the repository which contains JSON like this:
 
 ````
-{ "name":"VDR2",
-  "version":1.0,
-  "date":"6 Apr 2024",
-  "new":"Initial release"
+{	"name":"VDR2",
+	"version":"1.1.1",
+	"date":"12 Apr 2024",
+	"new":"Fix for PGN 130306 -> MWV conversion\nNew file control\nCan now create new file",
+	"pluginMinVersion": 3.0,
+	"comment": "Don't forget to set same version number in the script too!"
 }
 ````
 It compares the version number with its own version number and proposes to download the new version.
