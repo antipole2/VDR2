@@ -33,11 +33,16 @@ For instructions on how to do this, [see here](https://github.com/antipole2/VDR2
 
 ## Control panel
 
-The script presents one dialogue to select the log file and another to control recording.
+The script presents a control panel through which you can set
 
-The recording interval can be set and recording started, paused or ended.
+* Recording frequency
+* Minimum distance between records
 
-The recording mode can be
+You can create a new file or select an existing one.
+If you are recording to an existing file, you can choose to overwrite it or append to existing data.
+
+There is an option to automatically resume recording on script start-up if you were recording when the script stopped.
+
 
 #### Overwrite
 
