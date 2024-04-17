@@ -31,7 +31,7 @@ See the User Guide for more information.
 
 Here we check whether options have been saved from a previous script run.
 If not they are set to initial values.
-In the debugging section, there is a statement commented out that undefines `remember`.
+In the debugging section, there is a statement commented out that undefines `_remember`.
 This can be used to force 'first-time' behaviour for testing.
 
 ## Initial action
