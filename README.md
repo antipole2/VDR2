@@ -42,24 +42,25 @@ You can create a new file or select an existing one.
 If you are recording to an existing file, you can choose to overwrite it or append to existing data.
 
 There is an option to automatically resume recording on script start-up if you were recording when the script stopped.
-
-
-#### Overwrite
-
-When recording starts, it overwrites the log file.
-
-#### Append
-
-Data is appended to any existing data in the log file
-
-#### Append (auto start)
-
-In this mode, if recording was in progress when the script stopped (or the plugin was disabled) then recording will automatically recommence when the script runs again.  If you combine this with the console _Auto run_ option, recording will automatically recommence when the plugin is loaded.  Thus recording can be auomatically started when OpenCPN is launched.  An alert is displayed for a short while to advise that recording has recommenced.
+Combining this with the option to automatically start the script, you could arrange for recording to resume when OpenCPN starts up.
 
 #### Calling up the control panel
 
 When a control panel choice has been made, the panel is no longer displayed. All that is visible is the parked console.  To summon up the control panel - perhaps to start, stop of pause recording, you click on the console's close button.
 (This may seem counter-intuitive but that is how it is.)
+
+#### Controlling the recording
+
+While recording is in progress you can summon a panel that allows you to pause or end the recording.
+
+If recording is paused, you have the option to resume recording with the same or a different frequency or minimum distance or to end recording.
+
+All the panels have the option to dismiss them.
+This leaves the script running but with no chnage in the action.
+It is a way of clearing the panel out of the way.
+You would need to summon the panel back using the Close button.
+
+Ther is also the op[tion to stop the script.
 
 ## Installing the script
 
