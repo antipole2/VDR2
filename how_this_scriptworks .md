@@ -13,7 +13,7 @@ The first part contains declarations used to configure how the script behaves.
 
 There are boolean values to control whether or not data is written to file and/or printed on the screen
 
-n2kConverserts is a structure (not an array) linking PGNs to their converter functions.
+n2kConverters is a structure (not an array) linking PGNs to their converter functions.
 More about these later.
 
 Next are declarations of variables or values that need to endure during the life of the execution.
