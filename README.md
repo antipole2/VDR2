@@ -56,11 +56,11 @@ While recording is in progress you can summon a panel that allows you to pause o
 If recording is paused, you have the option to resume recording with the same or a different frequency or minimum distance or to end recording.
 
 All the panels have the option to dismiss them.
-This leaves the script running but with no chnage in the action.
+This leaves the script running but with no change in the action.
 It is a way of clearing the panel out of the way.
 You would need to summon the panel back using the Close button.
 
-Ther is also the op[tion to stop the script.
+Ther is also the option to stop the script.
 
 ## Installing the script
 
