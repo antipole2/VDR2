@@ -29,7 +29,7 @@ var options;
 var nmeaStash = {};
 var n2kStash = {};
 var n2Kobjects = {};	// to hold the NMEA2000 objects
-var logFile;		// the log file object
+var logFile = false;		// the log file object
 var intervalIndex;	// indexes into dialogues declared in outer scope
 var fileModeIndex;
 var autoIndex;
@@ -58,9 +58,8 @@ if (options.status == "firstTime"){
 else if (options.status == "recording"){	// must have quit while recording
 	if (options.autoStart) {
 		if (trace) print("Resuming recordings\n");
-		logFile = new File(options.fileString, "APPEND");
 		advise(10, "Recording resumed");
-		resumeRecording();
+		startRecording(options.fileString, APPEND);
 		}
 	else	options.status = "stopped";
 	}
@@ -100,7 +99,8 @@ function startRecording(fileString, mode){
 	}
 
 function resumeRecording(){
-	if (trace) print("resumeRecording\n");
+	if (trace) print("resumeRecording - logFile: ", logFile.fileString,
+		" position: ", logFile.tell(), "\n");
 	options.status = "recording";
 	consoleName(scriptName+ "_"  + options.status);
 	OCPNonAllNMEA0183(nmea0183Capture);
@@ -169,7 +169,7 @@ function capture(){
 	keys =  Object.keys(nmeaStash);
 	for (var i = 0; i < keys.length; i++){
 		sentence = nmeaStash[keys[i]];
-		buffer += "$" + sentence + "*" + NMEA0183checksum(sentence) + "\n";
+		buffer += sentence + "*" + NMEA0183checksum(sentence) + "\n";
 		}
 	nmeaStash = {};
 
@@ -188,7 +188,8 @@ function capture(){
 		n2kConverters[key](decoded);
 		}
 	n2kStash = {};
-	if (logToDisplay) print(buffer);
+	if (buffer.length < 1) return;		// avoid writing of no data
+	if (logToDisplay) print(buffer.length, "chars: ", buffer);
 	if (logToFile) logFile.writeText(buffer);
 	}
 
