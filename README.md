@@ -46,7 +46,7 @@ Combining this with the option to automatically start the script, you could arra
 
 #### Calling up the control panel
 
-When a control panel choice has been made, the panel is no longer displayed. All that is visible is the parked console.  To summon up the control panel - perhaps to start, stop of pause recording, you click on the console's close button.
+When a control panel choice has been made, the panel is no longer displayed. All that is visible is the parked console.  To summon up the control panel - perhaps to start, stop or pause recording, you click on the console's close button.
 (This may seem counter-intuitive but that is how it is.)
 
 #### Controlling the recording
