@@ -14,11 +14,11 @@ Rather than logging the basic navigation data (position, CMG, SMG) directly from
 
 ## Omitting NMEA0183 data
 
-There is a table `omit` containing NMEA0183 sentence types to be omitted.  You can add to this as required.
+A table `omit` contains NMEA0183 sentence types to be omitted.  Please feel free to add to this as required.
 
 ## NMEA2000 data
 
-If you have an NMEA2000 input, VDR2 can log that data by converting it to NMEA0183 sentences.  It does not rely on OpenCPN to perform the decoding but can handle any PGN for which there is a descriptor in the Canboat library.  The script has a table of PGNs to be listened for and a converter function which generates the NMEA0183 sentence.  These converter functions are quite simple - perhaps 6-7 lines of code.
+If you have an NMEA2000 input, VDR2 can log that data by converting it to NMEA0183 sentences.  It does not rely on OpenCPN to perform the decoding but can handle any PGN for which there is a descriptor in the Canboat library.  The script has a table of PGNs to be listened for and a converter function which generates the NMEA0183 sentence.  These converter functions are simple - perhaps 6-7 lines of code.
 
 At present, there are converters for PGN 128267 (depth) and PGN 30306 (wind).
 
@@ -87,4 +87,4 @@ To discuss this script's functionality, use the Discussions tab above.
 
 2. The script options are stored in the console's `_remember` variable.  They thus endure between script runs and across OpenCPN restarts (provided OpenCPN quits gracefully).  The `_remember` variable is unique to the console.  Should you run the script in a different console, it will have fresh option settings.
   
-4. There is a [description of how the script works](https://github.com/antipole2/VDR2/blob/main/how_this_scriptworks%20.md), which should help understnd it.  It also describes the programming tachniques that could be useful elsewhere.
+4. There is a [description of how the script works](https://github.com/antipole2/VDR2/blob/main/how_this_scriptworks%20.md), which should help understand it.  It also describes the programming techniques that could be useful elsewhere.
