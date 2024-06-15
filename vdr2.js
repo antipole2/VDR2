@@ -17,7 +17,7 @@ n2kConverters = {
 	130306: convert130306	// wind
 	};
 
-const scriptVersion = "1.1.1";
+const scriptVersion = "1.1.3";
 
 // Declarations in outermost scope
 const scriptName = "VDR2";
@@ -444,10 +444,26 @@ function tidyUp(){
 
 function checkForUpdates(){
 	if (!OCPNisOnline()) return;
+	checkDays = 5;	// how often to check
+	if (_remember.hasOwnProperty("versionControl")){
+		if (trace) print("_remember: ", JSON.stringify(_remember), "\n");
+		now = new Date().getTime();
+		lastCheck = _remember.versionControl.lastCheck;
+		nextCheck = lastCheck + checkDays*24*60*60*1000;
+		if (trace) print("now: ", now, "\tversionControl.lastCheck was ", lastCheck, "\tnext due ", nextCheck, "\n");
+		if (now < nextCheck){
+			_remember.versionControl.lastCheck = now;
+			return;
+			}
+		}
+	choice = messageBox("Are you truely on-line to the internet?", "YesNo", "checkVersion");
+	if (choice == 3){
+		_remember.versionControl.lastCheck = now;
+		return;
+		}
 	check = require("https://raw.githubusercontent.com/antipole2/JavaScript_pi/master/onlineIncludes/checkForUpdates.js");
-	check(scriptVersion, days = 2,
+	check(scriptVersion, checkDays,
 		"https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js",	// url of script
 		"https://raw.githubusercontent.com/antipole2/VDR2/main/version.JSON"// url of version JSON
 		);
 	}
-
