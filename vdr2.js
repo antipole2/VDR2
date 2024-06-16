@@ -444,10 +444,10 @@ function tidyUp(){
 
 function checkForUpdates(){
 	if (!OCPNisOnline()) return;
+	now = new Date().getTime();
 	checkDays = 5;	// how often to check
 	if (_remember.hasOwnProperty("versionControl")){
 		if (trace) print("_remember: ", JSON.stringify(_remember), "\n");
-		now = new Date().getTime();
 		lastCheck = _remember.versionControl.lastCheck;
 		nextCheck = lastCheck + checkDays*24*60*60*1000;
 		if (trace) print("now: ", now, "\tversionControl.lastCheck was ", lastCheck, "\tnext due ", nextCheck, "\n");
