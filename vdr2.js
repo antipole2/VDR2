@@ -17,11 +17,13 @@ n2kConverters = {
 	130306: convert130306	// wind
 	};
 
-const scriptVersion = "1.1.3";
+const scriptName = "VDR2";
+const scriptVersion = "1.2";
+consoleName(scriptName);
+require("pluginVersion")("3.1.1");
+require("checkForUpdate")(scriptName, scriptVersion, 0, "https://raw.githubusercontent.com/antipole2/VDR2/main/version.JSON");
 
 // Declarations in outermost scope
-const scriptName = "VDR2";
-consoleName(scriptName);
 const sender = "VL";	// NMEA0183 sender for generated sentences
 const dialogueCaption = [{type:"caption", value:scriptName}];
 File = require("File");
@@ -46,7 +48,6 @@ File = require("File");
 NMEA2000 = require("NMEA2000");
 onExit(tidyUp);
 getOptions();
-checkForUpdates();
 haveN2k = setupN2k();	// set true if we have N2k connection
 if (trace) print(options, "\n");
 
@@ -433,37 +434,11 @@ function cancelAlert(){
 
 function oneTimeAdvice(){
 	if (options.adviceGiven) return;
-	advice = "To bring up the script controls again\nclick on the console's Close button";
+	advice = "To bring up the script controls again\nhold down Command key (Windows Ctrl)\nand click on the console's Close button";
 	advise(20, advice);
 	options.adviceGiven = true;
 	}
 
 function tidyUp(){
 	consoleName(scriptName);
-	}
-
-function checkForUpdates(){
-	if (!OCPNisOnline()) return;
-	now = new Date().getTime();
-	checkDays = 5;	// how often to check
-	if (_remember.hasOwnProperty("versionControl")){
-		if (trace) print("_remember: ", JSON.stringify(_remember), "\n");
-		lastCheck = _remember.versionControl.lastCheck;
-		nextCheck = lastCheck + checkDays*24*60*60*1000;
-		if (trace) print("now: ", now, "\tversionControl.lastCheck was ", lastCheck, "\tnext due ", nextCheck, "\n");
-		if (now < nextCheck){
-			_remember.versionControl.lastCheck = now;
-			return;
-			}
-		}
-	choice = messageBox("Are you truely on-line to the internet?", "YesNo", "checkVersion");
-	if (choice == 3){
-		_remember.versionControl.lastCheck = now;
-		return;
-		}
-	check = require("https://raw.githubusercontent.com/antipole2/JavaScript_pi/master/onlineIncludes/checkForUpdates.js");
-	check(scriptVersion, checkDays,
-		"https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js",	// url of script
-		"https://raw.githubusercontent.com/antipole2/VDR2/main/version.JSON"// url of version JSON
-		);
 	}
