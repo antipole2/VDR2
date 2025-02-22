@@ -124,26 +124,5 @@ The `advise` function is used to display an alert that will self-cancel after an
 
 ## Version checking
 
-This is an experimental system to prompt users to update the script when a new version becomes available.
-
-It checks whether we are online and if the required time has elased since the last check, which is stored in `_remember`.
-
-If a check is due, it reads a version control file `version.JSON`from the repository which contains JSON like this:
-
-````
-{	"name":"VDR2",
-	"version":"1.1.1",
-	"date":"12 Apr 2024",
-	"new":"Fix for PGN 130306 -> MWV conversion\nNew file control\nCan now create new file",
-	"pluginMinVersion": 3.0,
-	"comment": "Don't forget to set same version number in the script too!"
-}
-````
-It compares the version number with its own version number and proposes to download the new version.
-
-If the user has modified their copy of the script, these changes would be lost.
-So it issues appropriate warnings.
-
-If the go ahead is given, the new version is downloaded into the script pane.
-Note that the console is still running the previous version of the script.
+The script checks for new versions using the mechanism built into the JavaScript plugin v2.1.
 All that remains is to stop th script and restart using the new version.
