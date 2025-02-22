@@ -21,7 +21,7 @@ const scriptName = "VDR2";
 const scriptVersion = "1.2";
 consoleName(scriptName);
 require("pluginVersion")("3.1.1");
-require("checkForUpdate")(scriptName, scriptVersion, 0, "https://raw.githubusercontent.com/antipole2/VDR2/main/version.JSON");
+require("checkForUpdate")(scriptName, scriptVersion, 5, "https://raw.githubusercontent.com/antipole2/VDR2/main/version.JSON");
 
 // Declarations in outermost scope
 const sender = "VL";	// NMEA0183 sender for generated sentences

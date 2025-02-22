@@ -3,6 +3,6 @@
 	"date":"17 Feb 2025",
 	"script": "https://raw.githubusercontent.com/antipole2/VDR2/main/vdr2.js",
 	"new":"Incorporates in-built update checking",
-	"pluginMinVersion": 3.1.1,	
+	"pluginMinVersion": "3.1.1",	
 	"comment": "Don't forget to set same version number in the script too!"
 }
